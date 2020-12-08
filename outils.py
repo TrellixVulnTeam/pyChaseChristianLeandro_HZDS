@@ -7,6 +7,7 @@ from fourni.personnage import Personnage
 DISTANCE_ENTRE_CASE = 32
 X_PREMIERE_CASE = 20
 
+
 def creer_image(can, x: int, y: int, image: object):
     """
     Fonction qui permet de créer/remplacer une image dans le canvas. Pour l'utiliser il faut préciser :
@@ -16,7 +17,7 @@ def creer_image(can, x: int, y: int, image: object):
     :param image: une image tirée de la liste d'image (voir énoncé pour quelle image choisir via quel index)
     :return:
     """
-    can.create_image(x* DISTANCE_ENTRE_CASE + X_PREMIERE_CASE, y* DISTANCE_ENTRE_CASE + X_PREMIERE_CASE, image=image)
+    can.create_image(x * DISTANCE_ENTRE_CASE + X_PREMIERE_CASE, y * DISTANCE_ENTRE_CASE + X_PREMIERE_CASE, image=image)
 
 
 def creer_mur(x: int, y: int) -> Mur:
@@ -39,7 +40,7 @@ def creer_minotaure(x: int, y: int) -> Minotaure:
     return Minotaure(x, y)
 
 
-def creer_sortie(x: int, y: int)-> Sortie:
+def creer_sortie(x: int, y: int) -> Sortie:
     """
     Fonction permettant de créer une Sortie.
     :param x: coordonnée en x de la Sortie à créer

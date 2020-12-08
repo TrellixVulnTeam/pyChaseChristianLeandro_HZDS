@@ -6,6 +6,7 @@ from outils import \
 
 # Variable globale pour la mort du joueur
 joueur_mort: bool = False
+
 # Constante à utiliser
 NIVEAU_DIFFICULTE: int = 5
 
@@ -19,7 +20,10 @@ def jeu_en_cours(joueur) -> str:
     :return: un string "mort" si le joueur est mort ou "fini" si le joueur s'est echappé. Retourne "" si la partie 
              est en cours
     """
-    pass
+    if joueur_mort:
+        return "mort"
+    else:
+        return "fini"
 
 
 def charger_niveau(carte: list, joueur: list, minotaures: list, sorties: list, murs: list, path: str):
@@ -33,7 +37,40 @@ def charger_niveau(carte: list, joueur: list, minotaures: list, sorties: list, m
     :param murs: liste des murs
     :param path: chemin du fichier.txt
     """
-    pass
+
+    # Ouverture du fichier. (level1,2,3.txt)
+    with open(path, "r") as level:
+        # Initialisation des variables nécessaires
+        x: int = 0
+        y: int = 0
+        count: int = 0
+
+        # Recupueré toutes les lignes differentes grace au readline.
+        lignes = level.readlines()
+
+        # Prendre les lignes une par une
+        for ligne in lignes:
+
+            carte.append(list(ligne))
+
+            # prendre les characteres 1 par 1.
+            for char in ligne:
+                if char == "#":
+                    murs.append(creer_mur(x, y))
+                elif char == "$":
+                    minotaures.append(creer_minotaure(x, y))
+                elif char == "@":
+                    joueur.append((creer_personnage(x, y)))
+                elif char == ".":
+                    sorties.append((creer_sortie(x, y)))
+
+                x += 1
+                count += 1
+
+            # Incrémenter Y et remettre X a 0 quand on arrive a la fin de la ligne
+            if count % len(ligne) == 0:
+                x = 0
+                y += 1
 
 
 def avancer_minotaure(minotaures: list, joueur: list, murs: list, carte: list, can, liste_image: list):
@@ -48,10 +85,10 @@ def avancer_minotaure(minotaures: list, joueur: list, murs: list, carte: list, c
         :param can: Canvas (ignorez son fonctionnement), utile uniquement pour créer_image()
         :param liste_image : Liste contenant les références sur les images
     """
-    pass
 
 
-def definir_mouvement(direction: str, can, joueur: list, murs: list, minotaures: list, sorties: list, carte: list, liste_image: list):
+def definir_mouvement(direction: str, can, joueur: list, murs: list, minotaures: list, sorties: list, carte: list,
+                      liste_image: list):
     """
     Fonction permettant de définir la case de destination selon la direction choisie.
     :param direction: Direction dans laquelle le joueur se déplace (droite, gauche, haut, bas)
@@ -64,11 +101,36 @@ def definir_mouvement(direction: str, can, joueur: list, murs: list, minotaures:
     :param liste_image: Liste contenant les références sur les images
     :return:
     """
-    pass
+
+    old_x: int = joueur[0].x
+    old_y: int = joueur[0].y
+
+    new_x: int = joueur[0].x
+    new_y: int = joueur[0].y
+
+    if direction == "gauche":
+        new_x = old_x - 1
+
+    if direction == "droite":
+        new_x = old_x + 1
+
+    if direction == "haut":
+        new_y = old_y + 1
+
+    if direction == "bas":
+        new_y = old_y - 1
+
+    # création de la variable destination (nécessaire pour effectuer_mouvement)
+    coordonnee_destination = creer_case_vide(new_x, new_y)
+    effectuer_mouvement(coordonnee_destination, minotaures, murs, joueur, sorties, carte, can, liste_image, new_x,
+                        new_y)
+
+    # Remplacer l'ancienne image par une case vide (6 = image du sol)
+    creer_image(can, old_x, old_y, liste_image[6])
 
 
-
-def effectuer_mouvement(coordonnee_destination, minotaures: list, murs: list, joueur: list, sorties: list, carte: list, can,
+def effectuer_mouvement(coordonnee_destination, minotaures: list, murs: list, joueur: list, sorties: list, carte: list,
+                        can,
                         liste_image: list, deplace_joueur_x: int, deplace_joueur_y: int):
     """
     Fonction permettant d'effectuer le déplacement ou de ne pas l'effectuer si celui-ci n'est pas possible.
@@ -86,7 +148,13 @@ def effectuer_mouvement(coordonnee_destination, minotaures: list, murs: list, jo
     :param deplace_joueur_x: coordonnée en x à laquelle le joueur va être après le mouvement
     :param deplace_joueur_y: coordonnée en y à laquelle le joueur va être après le mouvement
     """
-    pass
+
+    print(coordonnee_destination.x)
+    print(coordonnee_destination.y)
+    if carte[coordonnee_destination.y][coordonnee_destination.x] != "-":
+        print("c pas bon")
+    else:
+        print("c bon")
 
 
 def chargement_score(scores_file_path: str, dict_scores: dict):
