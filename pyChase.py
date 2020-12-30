@@ -3,6 +3,7 @@ from outils import \
     creer_image, \
     creer_minotaure, creer_case_vide, creer_sortie, creer_mur, creer_personnage, \
     coordonnee_x, coordonnee_y, est_egal_a
+from numpy import *
 
 # Variable globale pour la mort du joueur
 joueur_mort: bool = False
