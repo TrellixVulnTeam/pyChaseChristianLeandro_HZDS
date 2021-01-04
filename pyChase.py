@@ -3,11 +3,9 @@ from outils import \
     creer_image, \
     creer_minotaure, creer_case_vide, creer_sortie, creer_mur, creer_personnage, \
     coordonnee_x, coordonnee_y, est_egal_a
-from numpy import *
 
 # Variable globale pour la mort du joueur
 joueur_mort: bool = False
-joueur_fini:bool = False
 
 # Constante à utiliser
 NIVEAU_DIFFICULTE: int = 5
@@ -16,20 +14,19 @@ NIVEAU_DIFFICULTE: int = 5
 # Fonctions à développer
 
 def jeu_en_cours(joueur:list) -> str:
-    etatPartie:str = ""
     """
     Fonction testant si le jeu est encore en cours et retournant un string comme réponse sur l'état de la partie.
     :param joueur: La liste des joueurs du niveau en cours
     :return: un string "mort" si le joueur est mort ou "fini" si le joueur s'est echappé. Retourne "" si la partie 
              est en cours
     """
-    if joueur_mort == True:
-        etatPartie:str = "mort"
-    elif joueur_fini == True:
-        etatPartie:str = "fini"
+    if joueur_mort:
+        return "mort"
+    elif any(joueur):
+        return ""
     else:
-        etatPartie = ""
-    return etatPartie
+        return "fini"
+
 
 def charger_niveau(carte: list, joueur: list, minotaures: list, sorties: list, murs: list, path: str):
     """
@@ -42,6 +39,8 @@ def charger_niveau(carte: list, joueur: list, minotaures: list, sorties: list, m
     :param murs: liste des murs
     :param path: chemin du fichier.txt
     """
+    global joueur_mort
+    joueur_mort = False
 
     # Ouverture du fichier. (level1,2,3.txt)
     with open(path, "r") as level:
@@ -51,7 +50,8 @@ def charger_niveau(carte: list, joueur: list, minotaures: list, sorties: list, m
         count: int = 0
 
         # Recupueré toutes les lignes differentes grace au readline.
-        lignes = level.readlines()
+        texte = level.read()
+        lignes = texte.split()
 
         # Prendre les lignes une par une
         for ligne in lignes:
@@ -77,7 +77,6 @@ def charger_niveau(carte: list, joueur: list, minotaures: list, sorties: list, m
                 x = 0
                 y += 1
 
-
 def avancer_minotaure(minotaures: list, joueur: list, murs: list, carte: list, can, liste_image: list):
     """
         Fonction permettant de faire avancer le(s) minotaure(s) grâce à l'algorithme de pathfinding. Suivant le niveau
@@ -90,7 +89,37 @@ def avancer_minotaure(minotaures: list, joueur: list, murs: list, carte: list, c
         :param can: Canvas (ignorez son fonctionnement), utile uniquement pour créer_image()
         :param liste_image : Liste contenant les références sur les images
     """
+    newPath:list = []
+    x_minotaure:int = minotaures[0].x
+    y_minotaure:int = minotaures[0].y
 
+    x_joueur: int = joueur[0].x
+    y_joueur: int = joueur[0].y
+
+    start:list = [x_minotaure, y_minotaure]
+    end:list = [x_joueur, y_joueur]
+
+    next_minotaure_x:int = 0
+    next_minotaure_y:int = 0
+
+    newPath = pathfinder.search(murs, carte, 1, start, end)
+
+    for index, i in enumerate(newPath):
+        if NIVEAU_DIFFICULTE in i:
+            next_minotaure_x = i.index(NIVEAU_DIFFICULTE)
+            next_minotaure_y = index
+
+    if any(NIVEAU_DIFFICULTE in line for line in newPath):
+        minotaures.clear()
+        minotaures.append(creer_personnage(next_minotaure_x, next_minotaure_y))
+        creer_image(can, x_minotaure, y_minotaure, liste_image[6])
+    else:
+        minotaures.clear()
+        global joueur_mort
+        joueur_mort = True
+        joueur.clear()
+        minotaures.append(creer_personnage(x_joueur, y_joueur))
+        creer_image(can, x_minotaure, y_minotaure, liste_image[6])
 
 def definir_mouvement(direction: str, can, joueur: list, murs: list, minotaures: list, sorties: list, carte: list,
                       liste_image: list):
@@ -110,21 +139,21 @@ def definir_mouvement(direction: str, can, joueur: list, murs: list, minotaures:
     old_x: int = joueur[0].x
     old_y: int = joueur[0].y
 
-    new_x: int = joueur[0].x
-    new_y: int = joueur[0].y
+    new_x: int = 0
+    new_y: int = 0
 
     if direction == "gauche":
         new_x = old_x - 1
-
+        new_y = old_y
     if direction == "droite":
         new_x = old_x + 1
-
+        new_y = old_y
     if direction == "haut":
-        new_y = old_y + 1
-
-    if direction == "bas":
         new_y = old_y - 1
-
+        new_x = old_x
+    if direction == "bas":
+        new_y = old_y + 1
+        new_x = old_x
     # création de la variable destination (nécessaire pour effectuer_mouvement)
     coordonnee_destination = creer_case_vide(new_x, new_y)
     effectuer_mouvement(coordonnee_destination, minotaures, murs, joueur, sorties, carte, can, liste_image, new_x,
@@ -132,6 +161,8 @@ def definir_mouvement(direction: str, can, joueur: list, murs: list, minotaures:
 
     # Remplacer l'ancienne image par une case vide (6 = image du sol)
     creer_image(can, old_x, old_y, liste_image[6])
+
+
 
 
 def effectuer_mouvement(coordonnee_destination, minotaures: list, murs: list, joueur: list, sorties: list, carte: list,
@@ -156,10 +187,19 @@ def effectuer_mouvement(coordonnee_destination, minotaures: list, murs: list, jo
 
     print(coordonnee_destination.x)
     print(coordonnee_destination.y)
-    if carte[coordonnee_destination.y][coordonnee_destination.x] != "-":
-        print("c pas bon")
+    if coordonnee_destination in murs:
+        avancer_minotaure(minotaures, joueur, murs, carte, can, liste_image)
     else:
-        print("c bon")
+        joueur.clear()
+        if coordonnee_destination not in sorties:
+            joueur.append(creer_personnage(deplace_joueur_x, deplace_joueur_y))
+        if deplace_joueur_x == minotaures[0].x and deplace_joueur_y == minotaures[0].y:
+            joueur.clear()
+            global joueur_mort
+            joueur_mort = True
+
+
+
 
 
 
