@@ -7,6 +7,7 @@ from numpy import *
 
 # Variable globale pour la mort du joueur
 joueur_mort: bool = False
+joueur_fini:bool = False
 
 # Constante à utiliser
 NIVEAU_DIFFICULTE: int = 5
@@ -14,18 +15,21 @@ NIVEAU_DIFFICULTE: int = 5
 
 # Fonctions à développer
 
-def jeu_en_cours(joueur) -> str:
+def jeu_en_cours(joueur:list) -> str:
+    etatPartie:str = ""
     """
     Fonction testant si le jeu est encore en cours et retournant un string comme réponse sur l'état de la partie.
     :param joueur: La liste des joueurs du niveau en cours
     :return: un string "mort" si le joueur est mort ou "fini" si le joueur s'est echappé. Retourne "" si la partie 
              est en cours
     """
-    if joueur_mort:
-        return "mort"
+    if joueur_mort == True:
+        etatPartie:str = "mort"
+    elif joueur_fini == True:
+        etatPartie:str = "fini"
     else:
-        return "fini"
-
+        etatPartie = ""
+    return etatPartie
 
 def charger_niveau(carte: list, joueur: list, minotaures: list, sorties: list, murs: list, path: str):
     """
@@ -156,6 +160,7 @@ def effectuer_mouvement(coordonnee_destination, minotaures: list, murs: list, jo
         print("c pas bon")
     else:
         print("c bon")
+
 
 
 def chargement_score(scores_file_path: str, dict_scores: dict):
