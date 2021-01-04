@@ -185,8 +185,6 @@ def effectuer_mouvement(coordonnee_destination, minotaures: list, murs: list, jo
     :param deplace_joueur_y: coordonnée en y à laquelle le joueur va être après le mouvement
     """
 
-    print(coordonnee_destination.x)
-    print(coordonnee_destination.y)
     if coordonnee_destination in murs:
         avancer_minotaure(minotaures, joueur, murs, carte, can, liste_image)
     else:
@@ -210,7 +208,19 @@ def chargement_score(scores_file_path: str, dict_scores: dict):
     :param dict_scores:  le dictionnaire pour le stockage
     :return:
     """
-    pass
+    with open(scores_file_path, "r") as scorefile:
+        for lines in scorefile:
+            texte = lines.strip()
+            score = texte.split(";")
+
+            numNiveau = score[0]
+
+            count = 0
+            dict_scores[numNiveau] = []
+            for s in score:
+                if count != 0:
+                    dict_scores[numNiveau].append(float(s))
+                count += 1
 
 
 def maj_score(niveau_en_cours: int, dict_scores: dict) -> str:
@@ -224,8 +234,14 @@ def maj_score(niveau_en_cours: int, dict_scores: dict) -> str:
     :param dict_scores: le dictionnaire pour stockant les scores
     :return str: Le str contenant l'affichage pour les scores ("\n" pour passer à la ligne)
     """
-    pass
-
+    resultat:str = "Niveau " + str(niveau_en_cours) + "\n"
+    listeScore = dict_scores[str(niveau_en_cours)]
+    listeScore = sorted(listeScore)
+    count:int = 1
+    for score in listeScore:
+        resultat += str(count) + ") " + str(score) + "\n"
+        count += 1
+    return resultat
 
 def enregistre_score(temps_niveau: float, temps_initial: float, dict_scores: dict, niveau_en_cours: int):
     """
@@ -235,7 +251,12 @@ def enregistre_score(temps_niveau: float, temps_initial: float, dict_scores: dic
     :param dict_scores: Le dictionnaire stockant les scores
     :param niveau_en_cours: Le numéro du niveau en cours
     """
-    pass
+    nouveauScore:float = round(temps_initial - temps_niveau, 2)
+
+    listeScore = dict_scores[str(niveau_en_cours)]
+    for score in listeScore:
+        if nouveauScore < float(score):
+            listeScore.append(nouveauScore)
 
 
 def update_score_file(scores_file_path: str, dict_scores: dict):
@@ -244,7 +265,7 @@ def update_score_file(scores_file_path: str, dict_scores: dict):
     :param scores_file_path: le chemin d'accès du fichier de stockage des scores
     :param dict_scores: Le dictionnaire stockant les scores
     """
-    pass
+        
 
 
 if __name__ == '__main__':
