@@ -235,12 +235,10 @@ def maj_score(niveau_en_cours: int, dict_scores: dict) -> str:
     :return str: Le str contenant l'affichage pour les scores ("\n" pour passer à la ligne)
     """
     resultat:str = "Niveau " + str(niveau_en_cours) + "\n"
-    listeScore = dict_scores[str(niveau_en_cours)]
-    listeScore = sorted(listeScore)
-    count:int = 1
-    for score in listeScore:
-        resultat += str(count) + ") " + str(score) + "\n"
-        count += 1
+    dict_scores[str(niveau_en_cours)] = sorted(dict_scores[str(niveau_en_cours)], key= lambda x: float('inf') if x ==0.0 else x)
+    for i, score in enumerate(dict_scores[str(niveau_en_cours)]):
+        if i < 10:
+            resultat += str(i + 1) + ") " + str(score) + "\n"
     return resultat
 
 def enregistre_score(temps_niveau: float, temps_initial: float, dict_scores: dict, niveau_en_cours: int):
@@ -252,11 +250,7 @@ def enregistre_score(temps_niveau: float, temps_initial: float, dict_scores: dic
     :param niveau_en_cours: Le numéro du niveau en cours
     """
     nouveauScore:float = round(temps_initial - temps_niveau, 2)
-
-    listeScore = dict_scores[str(niveau_en_cours)]
-    for score in listeScore:
-        if nouveauScore < float(score):
-            listeScore.append(nouveauScore)
+    dict_scores[str(niveau_en_cours)].append(nouveauScore)
 
 
 def update_score_file(scores_file_path: str, dict_scores: dict):
@@ -265,7 +259,18 @@ def update_score_file(scores_file_path: str, dict_scores: dict):
     :param scores_file_path: le chemin d'accès du fichier de stockage des scores
     :param dict_scores: Le dictionnaire stockant les scores
     """
-        
+    resultat:str = ""
+    with open(scores_file_path, "w+") as scorefile:
+        for key, values in dict_scores.items():
+            resultat += str(key) + ";"
+            for i, value in enumerate(values):
+                if i + 1 != len(values):
+                    resultat += str(value) + ";"
+                else:
+                    resultat += str(value)
+            resultat += "\n"
+            scorefile.write(resultat)
+            resultat = ""
 
 
 if __name__ == '__main__':
