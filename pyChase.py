@@ -1,3 +1,11 @@
+"""
+"       Auteurs                 : Russo Christian, Russotti Leandro.
+"       Dernière modification   : 06.01.2021.
+"       Projet                  : PyChase.
+"       Description             : Jeu de labyrinthe avec un minotaure.
+"""
+
+
 from fourni import simulateur, pathfinder
 from outils import \
     creer_image, \
@@ -13,19 +21,30 @@ NIVEAU_DIFFICULTE: int = 5
 
 # Fonctions à développer
 
-def jeu_en_cours(joueur:list) -> str:
+def jeu_en_cours(joueur: list) -> str:
     """
     Fonction testant si le jeu est encore en cours et retournant un string comme réponse sur l'état de la partie.
     :param joueur: La liste des joueurs du niveau en cours
-    :return: un string "mort" si le joueur est mort ou "fini" si le joueur s'est echappé. Retourne "" si la partie 
+    :return: un string "mort" si le joueur est mort ou "fini" si le joueur s'est echappé. Retourne "" si la partie
              est en cours
     """
+    # Variable contenant l'état de la partie.
+    state: str = ""
+
+    # Si le joueur est mort, met la variable état a mort
     if joueur_mort:
-        return "mort"
+        state = "mort"
+
+    # Si le joueur contient encore des données, met la variable vide.
     elif any(joueur):
-        return ""
+        state = ""
+
+    # Sinon, met la variable état a terminé.
     else:
-        return "fini"
+        state = "fini"
+
+    # Retourne l'état.
+    return state
 
 
 def charger_niveau(carte: list, joueur: list, minotaures: list, sorties: list, murs: list, path: str):
@@ -77,6 +96,7 @@ def charger_niveau(carte: list, joueur: list, minotaures: list, sorties: list, m
                 x = 0
                 y += 1
 
+
 def avancer_minotaure(minotaures: list, joueur: list, murs: list, carte: list, can, liste_image: list):
     """
         Fonction permettant de faire avancer le(s) minotaure(s) grâce à l'algorithme de pathfinding. Suivant le niveau
@@ -89,30 +109,38 @@ def avancer_minotaure(minotaures: list, joueur: list, murs: list, carte: list, c
         :param can: Canvas (ignorez son fonctionnement), utile uniquement pour créer_image()
         :param liste_image : Liste contenant les références sur les images
     """
-    newPath:list = []
-    x_minotaure:int = minotaures[0].x
-    y_minotaure:int = minotaures[0].y
+    # Création des variables de coordonés du minautore
+    x_minotaure: int = minotaures[0].x
+    y_minotaure: int = minotaures[0].y
 
+    # Création des variables de coordonés du minautore
     x_joueur: int = joueur[0].x
     y_joueur: int = joueur[0].y
 
-    start:list = [x_minotaure, y_minotaure]
-    end:list = [x_joueur, y_joueur]
+    # Création des variables contenant l'emplacement initial du minautore et l'emplacement final (les coordonés initiale du joueur)
+    start: list = [x_minotaure, y_minotaure]
+    end: list = [x_joueur, y_joueur]
 
-    next_minotaure_x:int = 0
-    next_minotaure_y:int = 0
+    # Création des prochaines coordonés du minautore.
+    next_minotaure_x: int = 0
+    next_minotaure_y: int = 0
 
-    newPath = pathfinder.search(murs, carte, 1, start, end)
+    # Appele la fonction fournie dans outils.py qui va définir le chemin le plus court selon le niveau.
+    newPath: list = pathfinder.search(murs, carte, 1, start, end)
 
+    # Boucle parcourant les listes de liste et les listes
     for index, i in enumerate(newPath):
+        # Si on trouve un chemin possible dans la liste, update les prochaines coordonés du minautore NIVEAU_DIFFICULTE = nombre de case parcourue par le minotaure
         if NIVEAU_DIFFICULTE in i:
             next_minotaure_x = i.index(NIVEAU_DIFFICULTE)
             next_minotaure_y = index
 
+    # Si le joueur n'est pas a l'emplacement du déplacement du minotaure, avance le minotaure normalement.
     if any(NIVEAU_DIFFICULTE in line for line in newPath):
         minotaures.clear()
         minotaures.append(creer_personnage(next_minotaure_x, next_minotaure_y))
         creer_image(can, x_minotaure, y_minotaure, liste_image[6])
+    # Sinon, se déplace a l'emplacement du joueur et le tue.
     else:
         minotaures.clear()
         global joueur_mort
@@ -120,6 +148,7 @@ def avancer_minotaure(minotaures: list, joueur: list, murs: list, carte: list, c
         joueur.clear()
         minotaures.append(creer_personnage(x_joueur, y_joueur))
         creer_image(can, x_minotaure, y_minotaure, liste_image[6])
+
 
 def definir_mouvement(direction: str, can, joueur: list, murs: list, minotaures: list, sorties: list, carte: list,
                       liste_image: list):
@@ -136,12 +165,15 @@ def definir_mouvement(direction: str, can, joueur: list, murs: list, minotaures:
     :return:
     """
 
+    # Déclaration des ancienne coordonées du joueur.
     old_x: int = joueur[0].x
     old_y: int = joueur[0].y
 
+    # Déclaration des nouvelles coordonées du joueur.
     new_x: int = 0
     new_y: int = 0
 
+    # Test des directions + ajout des nouvelles coordonés
     if direction == "gauche":
         new_x = old_x - 1
         new_y = old_y
@@ -154,6 +186,7 @@ def definir_mouvement(direction: str, can, joueur: list, murs: list, minotaures:
     if direction == "bas":
         new_y = old_y + 1
         new_x = old_x
+
     # création de la variable destination (nécessaire pour effectuer_mouvement)
     coordonnee_destination = creer_case_vide(new_x, new_y)
     effectuer_mouvement(coordonnee_destination, minotaures, murs, joueur, sorties, carte, can, liste_image, new_x,
@@ -161,8 +194,6 @@ def definir_mouvement(direction: str, can, joueur: list, murs: list, minotaures:
 
     # Remplacer l'ancienne image par une case vide (6 = image du sol)
     creer_image(can, old_x, old_y, liste_image[6])
-
-
 
 
 def effectuer_mouvement(coordonnee_destination, minotaures: list, murs: list, joueur: list, sorties: list, carte: list,
@@ -185,20 +216,21 @@ def effectuer_mouvement(coordonnee_destination, minotaures: list, murs: list, jo
     :param deplace_joueur_y: coordonnée en y à laquelle le joueur va être après le mouvement
     """
 
+    # Si la destination est un mur, fait avancer le minotaure.
     if coordonnee_destination in murs:
         avancer_minotaure(minotaures, joueur, murs, carte, can, liste_image)
+    # Sinon, avance le joueur a la nouvelle destination
     else:
+        # Supprime l'ancien dessin du joueur
         joueur.clear()
+        # Si la destination n'est pas la sortie, avance l'image du joueur
         if coordonnee_destination not in sorties:
             joueur.append(creer_personnage(deplace_joueur_x, deplace_joueur_y))
+        # Si l'emplacement du joueur est la meme que celle du minotaure, tue le joueur et termine la partie.
         if deplace_joueur_x == minotaures[0].x and deplace_joueur_y == minotaures[0].y:
             joueur.clear()
             global joueur_mort
             joueur_mort = True
-
-
-
-
 
 
 def chargement_score(scores_file_path: str, dict_scores: dict):
@@ -208,15 +240,18 @@ def chargement_score(scores_file_path: str, dict_scores: dict):
     :param dict_scores:  le dictionnaire pour le stockage
     :return:
     """
+    # Ouvres le fichier et le stock dans la variable scorefile.
     with open(scores_file_path, "r") as scorefile:
         for lines in scorefile:
+            # Supprime les saut de ligne
             texte = lines.strip()
+            # Sépare les scores des differents niveau.
             score = texte.split(";")
-
+            # Prend la première entrée du score (le numéro du niveau) et le stock dans numniveau
             numNiveau = score[0]
-
             count = 0
             dict_scores[numNiveau] = []
+            # Pour chaque score, sauf la première entrée, l'ajoute dans le dictionnaire dict_scores.
             for s in score:
                 if count != 0:
                     dict_scores[numNiveau].append(float(s))
@@ -234,12 +269,18 @@ def maj_score(niveau_en_cours: int, dict_scores: dict) -> str:
     :param dict_scores: le dictionnaire pour stockant les scores
     :return str: Le str contenant l'affichage pour les scores ("\n" pour passer à la ligne)
     """
-    resultat:str = "Niveau " + str(niveau_en_cours) + "\n"
-    dict_scores[str(niveau_en_cours)] = sorted(dict_scores[str(niveau_en_cours)], key= lambda x: float('inf') if x ==0.0 else x)
+    # Création de la variable résultat contenant l'affichage du score.
+    resultat: str = "Niveau " + str(niveau_en_cours) + "\n"
+    # Triage du dictionnaire.
+    dict_scores[str(niveau_en_cours)] = sorted(dict_scores[str(niveau_en_cours)],
+                                               key=lambda x: float('inf') if x == 0.0 else x)
+
+    # pour chaque score dans le dictionnaire du niveau en cours, ajoute une ligne dans la variable résultat.
     for i, score in enumerate(dict_scores[str(niveau_en_cours)]):
         if i < 10:
             resultat += str(i + 1) + ") " + str(score) + "\n"
     return resultat
+
 
 def enregistre_score(temps_niveau: float, temps_initial: float, dict_scores: dict, niveau_en_cours: int):
     """
@@ -249,7 +290,9 @@ def enregistre_score(temps_niveau: float, temps_initial: float, dict_scores: dic
     :param dict_scores: Le dictionnaire stockant les scores
     :param niveau_en_cours: Le numéro du niveau en cours
     """
-    nouveauScore:float = round(temps_initial - temps_niveau, 2)
+    # Calcul du nouveau score (le temps initial - le temps effectué) garder 2 décimales.
+    nouveauScore: float = round(temps_initial - temps_niveau, 2)
+    # Ajout du nouveau score dans le dictionnaire.
     dict_scores[str(niveau_en_cours)].append(nouveauScore)
 
 
@@ -259,16 +302,21 @@ def update_score_file(scores_file_path: str, dict_scores: dict):
     :param scores_file_path: le chemin d'accès du fichier de stockage des scores
     :param dict_scores: Le dictionnaire stockant les scores
     """
-    resultat:str = ""
+    resultat: str = ""
+    # Ouverture du fichier score dans la variable scorefile
     with open(scores_file_path, "w+") as scorefile:
+        # Parcoure le dictionnaire des scores et recupère la clé + les valeures correspondantes a la clé
         for key, values in dict_scores.items():
             resultat += str(key) + ";"
+            # Boucle parcourant la liste des scores par niveaux.
             for i, value in enumerate(values):
+                # Si c'est le dernier score de la liste, n'ajoute pas de ;.
                 if i + 1 != len(values):
                     resultat += str(value) + ";"
                 else:
                     resultat += str(value)
             resultat += "\n"
+            # Sauvegarde dans le fichier.
             scorefile.write(resultat)
             resultat = ""
 
